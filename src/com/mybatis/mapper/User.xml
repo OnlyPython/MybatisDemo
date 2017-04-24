@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mybatis.inter.IUserOperation">
+    <select id="selectUserByID" parameterType="int" resultType="User">
+        select * from users where id = #{id}
+    </select>
+    <!-- 为了返回List类型定义的resultMap -->
+    <resultMap type="User" id="userList">
+    	<id column="id" property="id"></id>
+    	<result column="username" property="userName"/>
+    	<result column="userage" property="userAge"></result>
+    	<result column="useraddress" property="userAddress"></result>
+    </resultMap>
+    
+    <resultMap type="Article" id="userArticlerList">
+    	<id property="id" column="aid"></id>
+    	<result property="title" column="title"></result>
+    	<result property="content" column="content"></result>
+    	<!-- 
+    	<association property="user" javaType="User">
+    		<id column="id" property="id"></id>
+    		<result column="username" property="userName"/>
+    		<result column="useraddress" property="userAddress"></result>
+    	</association>
+    	 -->
+    	 <!-- 第二种配置关联的方式 -->
+    	 <association property="user" javaType="User" resultMap="userList"></association>
+    </resultMap>
+    
+    <!-- 管理查询 -->
+    <select id="getUserArticlers" parameterType="int" resultMap="userArticlerList">
+    	select u.id, u.username, u.userage, u.useraddress, a.id aid, a.title, a.content from users u join article a on u.id = a.userid where u.id = #{id};;
+    </select>
+    
+    <!-- 查询userList的sql，resultMap为之前定义好的 -->
+    <select id="selectUserList" parameterType="string" resultMap="userList">
+    	select * from users where username like #{userName}
+    </select>
+    
+    <!-- 添加用户 , useGeneratedKeys为是否使用数据库自动增长主键, keyProperty为插入指定主键-->
+    <insert id="addUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+    	insert into users (username, userage, useraddress) values (#{userName}, #{userAge}, #{userAddress});
+    </insert>
+    
+    <update id="updateUser" parameterType="User">
+    	update users set username=#{userName}, userage=#{userAge}, useraddress=#{userAddress} where id=#{id};
+    </update>
+    
+    <delete id="deleteUser" parameterType="int">
+    	delete from users where id=#{id};
+    </delete>
+</mapper>
